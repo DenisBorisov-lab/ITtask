@@ -182,7 +182,7 @@ def generate_simplified_sdnf(arguments, function):
     global_counter = -1
     while global_counter != 0:
         global_counter = -1
-        for i in range(len(letters) - 1):
+        for i in range(len(letters)):
             glue_count = 0
             for j in range(0, len(letters)):
                 if i != j:
@@ -225,4 +225,4 @@ def generate_simplified_sdnf(arguments, function):
     print(reduce_same_implicants(simplified_implicants))
 
 
-hack(medium5)
+hack(f)

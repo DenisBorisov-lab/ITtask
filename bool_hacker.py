@@ -10,6 +10,10 @@ def logic1(a, b, c):
     return a and b and c or a and b and not c
 
 
+def medium5(a, b, c, d, e, f): return (a and not b and not d) and (not f or e or not c and f) or (
+        a and not b and not c and d) or (a and not b and c and d) or (c and not d and e and f) and (c or not e)
+
+
 def logic2(a, b, c):
     return (not a or b) and not (a or b) and (not a or c)
 
@@ -20,6 +24,10 @@ def medium2(a, b, c, d, e):
 
 def medium3(a, b, c, d, e):
     return (a and b) and (b and not a) or (c and e) and (not c and e) or (c and not e) or (not c and not e)
+
+
+def simple3(a, b, c, d):
+    return a and b or not c and d
 
 
 def hack(function):
@@ -116,13 +124,105 @@ def generate_table(arguments, function):
     return table
 
 
+def is_glued(first, second) -> bool:
+    count = 0
+    is_the_same = False
+    if len(first) != len(second):
+        return False
+    for i in range(len(first)):
+        if first[i] in second:
+            count += 1
+        else:
+            if first[i][0:1] == "-":
+                if first[i][1:2] in second:
+                    is_the_same = True
+            elif first[i][0:1] != "-":
+                if "-" + first[i] in second:
+                    is_the_same = True
+            else:
+                return False
+    return True if count == len(first) - 1 and is_the_same else False
+
+
+def generate_term(first_array, second_array):
+    result_array = []
+    for i in range(len(first_array)):
+        if first_array[i] == second_array[i]:
+            result_array.append(first_array[i])
+    return result_array
+
+
+def contains_implicants(implicants, letters):
+    counter = 0
+    for i in range(len(implicants)):
+        if implicants[i] in letters:
+            counter += 1
+    return True if counter == len(implicants) else False
+
+
+def reduce_same_implicants(implicants):
+    result = []
+    for i in range(len(implicants)):
+        if not (implicants[i] in result):
+            result.append(implicants[i])
+    return result
+
+
 def generate_simplified_sdnf(arguments, function):
     sdnf = generate_sdnf(arguments, function)
     terms = sdnf.split(" + ")
-    print(terms)
-    for i in range(len(terms) - 1):
-        args = terms[i][1:-1].split(" * ")
-        print(args)
+    letters = []
+    implicants = []
+    for i in range(len(terms)):
+        terms[i] = terms[i][1:-1]
+        letters.append(terms[i].split(" * "))
+
+    old_letters = letters
+    print(old_letters)
+    global_counter = -1
+    while global_counter != 0:
+        global_counter = -1
+        for i in range(len(letters) - 1):
+            glue_count = 0
+            for j in range(0, len(letters)):
+                if i != j:
+                    if is_glued(letters[i], letters[j]):
+                        global_counter += 1
+                        implicants.append(generate_term(letters[i], letters[j]))
+                        glue_count += 1
+            if glue_count == 0:
+                implicants.append(letters[i])
+        if len(implicants) == 0:
+            break
+        letters = implicants
+        implicants = []
+        global_counter += 1
+
+    letters = reduce_same_implicants(letters)
+
+    implicantion_table = [[0] * (len(old_letters)) for i in range(len(letters))]
+    for i in range(len(old_letters)):
+        for j in range(len(letters)):
+            if contains_implicants(letters[j], old_letters[i]):
+                implicantion_table[j][i] = 1
+
+    simplified_implicants = []
+    # проход по импликационной таблице
+    for i in range(len(old_letters)):
+        counter = 0
+        position = 0
+        for j in range(len(letters)):
+            if implicantion_table[j][i] == 1:
+                counter += 1
+                position = j
+        if counter == 1:
+            simplified_implicants.append(letters[position])
+        elif counter == 0:
+            simplified_implicants.append(letters[position])
+
+    for i in range(len(implicantion_table)):
+        print(implicantion_table[i])
+    print(reduce_same_implicants(simplified_implicants))
 
 
-hack(f)
+hack(medium5)

@@ -1,9 +1,8 @@
+import time
+
+
 def f(a, b, c):
     return a and (b or c)
-
-
-def medium4(a, b, c, d, e, f):
-    return a and not b or c and not d and e and f
 
 
 def logic1(a, b, c):
@@ -39,7 +38,10 @@ def hack(function):
     print(generate_sdnf(arguments, function))
     print()
     print("Упрощённая сднф: ")
-    generate_simplified_sdnf(arguments, function)
+    simplified_sdnf = generate_simplified_sdnf(arguments, function)
+    decorate_simplified_sdnf(simplified_sdnf)
+    print("Функция Шеффера")
+    Sheffer_transformation(simplified_sdnf)
 
 
 def generate_truth_table(arguments, function):
@@ -167,7 +169,11 @@ def reduce_same_implicants(implicants):
             result.append(implicants[i])
     return result
 
-
+def isEmpty(array):
+    for i in range(len(array)):
+        if len(array[i]) == 0:
+            return True
+    return False
 def generate_simplified_sdnf(arguments, function):
     sdnf = generate_sdnf(arguments, function)
     terms = sdnf.split(" + ")
@@ -178,8 +184,8 @@ def generate_simplified_sdnf(arguments, function):
         letters.append(terms[i].split(" * "))
 
     old_letters = letters
-    print(old_letters)
     global_counter = -1
+    v = 0
     while global_counter != 0:
         global_counter = -1
         for i in range(len(letters)):
@@ -188,12 +194,17 @@ def generate_simplified_sdnf(arguments, function):
                 if i != j:
                     if is_glued(letters[i], letters[j]):
                         global_counter += 1
-                        implicants.append(generate_term(letters[i], letters[j]))
+                        if not generate_term(letters[i], letters[j]) in implicants:
+                            implicants.append(generate_term(letters[i], letters[j]))
                         glue_count += 1
+
+            # print("Step", str(v) + ":", implicants)
+            # time.sleep(1)
+            v+=1
             if glue_count == 0:
                 implicants.append(letters[i])
-        if len(implicants) == 0:
-            break
+            if len(implicants) == 0:
+                break
         letters = implicants
         implicants = []
         global_counter += 1
@@ -220,9 +231,68 @@ def generate_simplified_sdnf(arguments, function):
         elif counter == 0:
             simplified_implicants.append(letters[position])
 
-    for i in range(len(implicantion_table)):
-        print(implicantion_table[i])
-    print(reduce_same_implicants(simplified_implicants))
+    if isEmpty(simplified_implicants):
+        return [[1]]
+    return reduce_same_implicants(simplified_implicants)
+
+
+def decorate_simplified_sdnf(dnf):
+    result = ""
+    if len(dnf) == 1 and len(dnf[0]) == 1 and dnf[0][0] == 1:
+        print(1)
+    else:
+        for i in range(len(dnf)):
+            term = ""
+            for j in range(len(dnf[i])):
+                term += dnf[i][j] + "*"
+            result += "(" + term[:-1] + ") + "
+        print(result[:-3])
+
+
+# отрицвание с помощью штирха шеффера a|a = -a
+def negation(simplified_sdnf):
+    for i in range(len(simplified_sdnf)):
+        for j in range(len(simplified_sdnf[i])):
+            letter = simplified_sdnf[i][j]
+            if letter[0:1] == "-":
+                simplified_sdnf[i][j] = letter[1:2] + "|" + letter[1:2]
+    return simplified_sdnf
+
+
+# коньюкция с помощью штриха Шеффера (a|b) | (a|b) = a*b
+def conjunction(simplified_sdnf):
+    result_array = []
+    for i in range(len(simplified_sdnf)):
+        result = simplified_sdnf[i][0]
+        for j in range(1, len(simplified_sdnf[i])):
+            result = "(" + result + ")" if len(result) > 1 else result
+            another_letter = "(" + simplified_sdnf[i][j] + ")" if len(simplified_sdnf[i][j]) > 1 else \
+                simplified_sdnf[i][j]
+            result = "(" + result + " | " + another_letter + ")" + " | " + "(" + result + " | " + another_letter + ")"
+            result_array.append(result)
+    if len(result_array) == 0 and len(simplified_sdnf) != 0:
+        result_array.append(simplified_sdnf[0][0])
+    return result_array
+
+
+# дизъюнкция с помощью штриха Шеффера (a|a) | (a|b) = a+b
+def disjunction(simplified_sdnf):
+    result = simplified_sdnf[0]
+    if len(simplified_sdnf) > 1:
+        for i in range(1, len(simplified_sdnf)):
+            result = "(" + result + ")" if len(result) > 1 else result
+            another_letter = "(" + simplified_sdnf[i] + ")" if len(simplified_sdnf[i]) > 1 else simplified_sdnf[i]
+            result = "(" + result + " | " + result + ")" + " | " + "(" + another_letter + " | " + another_letter + ")"
+    return result
+
+
+def Sheffer_transformation(dnf):
+    simplified_sdnf = dnf
+    if len(simplified_sdnf) == 1 and len(simplified_sdnf[0]) == 1 and simplified_sdnf[0][0] == 1:
+        print(1)
+    else:
+        simplified_sdnf = conjunction(negation(simplified_sdnf))
+        print(disjunction(simplified_sdnf))
 
 
 hack(f)

@@ -13,6 +13,9 @@ def medium5(a, b, c, d, e, f): return (a and not b and not d) and (not f or e or
 def logic2(a, b, c):
     return (not a or b) and not (a or b) and (not a or c)
 
+def wiki2(x1, x2, x3, x4):
+    return (not x1 and not x2 and not x3) or (x1 and x2 and x3) or (not x1 and x3 and not x4)
+
 
 def medium2(a, b, c, d, e):
     return a and b or (b and not a) or (c and e) or (not c and e) or (c and not e) or (not c and not e)
@@ -28,6 +31,9 @@ def simple3(a, b, c, d):
 
 def wiki1(x1, x2, x3):
     return x2 and not x3 or x1
+
+def wiki3(x, y, z, t):
+    return (y and not z and not t) or (x and not y) or (x and z)
 
 
 def hack(function):
@@ -168,8 +174,8 @@ def glue(letters) -> list:
                 counter += 1
 
         if counter == 0:
-            letters[i].append("*")
-            new_letters.append(letters[i])
+            new_letters.append([item.copy() for item in letters][i])
+            new_letters[len(new_letters) - 1].append("*")
     return new_letters
 
 
@@ -222,6 +228,9 @@ def generate_simplified_sdnf(arguments, function):
                 else:
                     dlc.append(letters[i])
             letters = new_letter
+            if len(letters) == 1:
+                letters[0].append("*")
+                break
 
     for i in range(len(dlc)):
         letters.append(dlc[i])
@@ -331,4 +340,4 @@ def Sheffer_transformation(dnf):
         print(disjunction(simplified_sdnf))
 
 
-hack(medium5)
+hack(wiki3)

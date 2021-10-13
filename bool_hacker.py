@@ -39,11 +39,10 @@ def hack(function):
     print(generate_sdnf(arguments, function))
     print()
     print("Упрощённая сднф: ")
-    decorate_simplified_sdnf(generate_simplified_sdnf(arguments, function))
-    # simplified_sdnf = generate_simplified_sdnf(arguments, function)
-    # decorate_simplified_sdnf(simplified_sdnf)
-    # print("Функция Шеффера")
-    # Sheffer_transformation(simplified_sdnf)
+    dnf = generate_simplified_sdnf(arguments, function)
+    decorate_simplified_sdnf(dnf)
+    print("Функция Шеффера")
+    Sheffer_transformation(dnf)
 
 
 def generate_truth_table(arguments, function):
@@ -127,43 +126,6 @@ def generate_table(arguments, function):
 
     return table
 
-
-# def is_glued(first, second) -> bool:
-#     count = 0
-#     is_the_same = False
-#     if len(first) != len(second):
-#         return False
-#     for i in range(len(first)):
-#         if first[i] in second:
-#             count += 1
-#         else:
-#             if first[i][0:1] == "-":
-#                 if first[i][1:2] in second:
-#                     is_the_same = True
-#             elif first[i][0:1] != "-":
-#                 if "-" + first[i] in second:
-#                     is_the_same = True
-#             else:
-#                 return False
-#     return True if count == len(first) - 1 and is_the_same else False
-#
-#
-# def generate_term(first_array, second_array):
-#     result_array = []
-#     for i in range(len(first_array)):
-#         if first_array[i] == second_array[i]:
-#             result_array.append(first_array[i])
-#     return result_array
-#
-#
-# def contains_implicants(implicants, letters):
-#     counter = 0
-#     for i in range(len(implicants)):
-#         if implicants[i] in letters:
-#             counter += 1
-#     return True if counter == len(implicants) else False
-#
-#
 def reduce_same_implicants(implicants):
     result = []
     for i in range(len(implicants)):
@@ -225,6 +187,15 @@ def containsKey(array1, array2):
     return True if counter == len(array1) else False
 
 
+def isEmpty(array):
+    counter = 0
+    for i in range(len(array)):
+        for j in range(len(array[i])):
+            if (array[i][j] == "-"):
+                counter += 1
+    return True if counter == len(array[0]) else False
+
+
 def generate_simplified_sdnf(arguments, function):
     sdnf = generate_sdnf(arguments, function)
     terms = sdnf.split(" + ")
@@ -266,6 +237,8 @@ def generate_simplified_sdnf(arguments, function):
 
     print(old_letters)
     print(letters)
+    if len(letters) == 1 and isEmpty(letters):
+        return [[1]]
 
     table = [[0] * (len(old_letters)) for i in range(len(letters))]
     for i in range(len(letters)):
@@ -364,4 +337,4 @@ def Sheffer_transformation(dnf):
         print(disjunction(simplified_sdnf))
 
 
-hack(medium2)
+hack(medium5)

@@ -126,6 +126,7 @@ def generate_table(arguments, function):
 
     return table
 
+
 def reduce_same_implicants(implicants):
     result = []
     for i in range(len(implicants)):
@@ -134,13 +135,6 @@ def reduce_same_implicants(implicants):
     return result
 
 
-#
-#
-# def isEmpty(array):
-#     for i in range(len(array)):
-#         if len(array[i]) == 0:
-#             return True
-#     return False
 def difference(array1, array2) -> bool:
     count = 0
     for i in range(len(array1)):

@@ -1,6 +1,3 @@
-import time
-
-
 def f(a, b, c):
     return a and (b or c)
 
@@ -29,6 +26,10 @@ def simple3(a, b, c, d):
     return a and b or not c and d
 
 
+def wiki1(x1, x2, x3):
+    return x2 and not x3 or x1
+
+
 def hack(function):
     arguments = function.__code__.co_varnames
     print("Таблица истинности: ")
@@ -38,10 +39,11 @@ def hack(function):
     print(generate_sdnf(arguments, function))
     print()
     print("Упрощённая сднф: ")
-    simplified_sdnf = generate_simplified_sdnf(arguments, function)
-    decorate_simplified_sdnf(simplified_sdnf)
-    print("Функция Шеффера")
-    Sheffer_transformation(simplified_sdnf)
+    decorate_simplified_sdnf(generate_simplified_sdnf(arguments, function))
+    # simplified_sdnf = generate_simplified_sdnf(arguments, function)
+    # decorate_simplified_sdnf(simplified_sdnf)
+    # print("Функция Шеффера")
+    # Sheffer_transformation(simplified_sdnf)
 
 
 def generate_truth_table(arguments, function):
@@ -126,42 +128,42 @@ def generate_table(arguments, function):
     return table
 
 
-def is_glued(first, second) -> bool:
-    count = 0
-    is_the_same = False
-    if len(first) != len(second):
-        return False
-    for i in range(len(first)):
-        if first[i] in second:
-            count += 1
-        else:
-            if first[i][0:1] == "-":
-                if first[i][1:2] in second:
-                    is_the_same = True
-            elif first[i][0:1] != "-":
-                if "-" + first[i] in second:
-                    is_the_same = True
-            else:
-                return False
-    return True if count == len(first) - 1 and is_the_same else False
-
-
-def generate_term(first_array, second_array):
-    result_array = []
-    for i in range(len(first_array)):
-        if first_array[i] == second_array[i]:
-            result_array.append(first_array[i])
-    return result_array
-
-
-def contains_implicants(implicants, letters):
-    counter = 0
-    for i in range(len(implicants)):
-        if implicants[i] in letters:
-            counter += 1
-    return True if counter == len(implicants) else False
-
-
+# def is_glued(first, second) -> bool:
+#     count = 0
+#     is_the_same = False
+#     if len(first) != len(second):
+#         return False
+#     for i in range(len(first)):
+#         if first[i] in second:
+#             count += 1
+#         else:
+#             if first[i][0:1] == "-":
+#                 if first[i][1:2] in second:
+#                     is_the_same = True
+#             elif first[i][0:1] != "-":
+#                 if "-" + first[i] in second:
+#                     is_the_same = True
+#             else:
+#                 return False
+#     return True if count == len(first) - 1 and is_the_same else False
+#
+#
+# def generate_term(first_array, second_array):
+#     result_array = []
+#     for i in range(len(first_array)):
+#         if first_array[i] == second_array[i]:
+#             result_array.append(first_array[i])
+#     return result_array
+#
+#
+# def contains_implicants(implicants, letters):
+#     counter = 0
+#     for i in range(len(implicants)):
+#         if implicants[i] in letters:
+#             counter += 1
+#     return True if counter == len(implicants) else False
+#
+#
 def reduce_same_implicants(implicants):
     result = []
     for i in range(len(implicants)):
@@ -169,71 +171,138 @@ def reduce_same_implicants(implicants):
             result.append(implicants[i])
     return result
 
-def isEmpty(array):
-    for i in range(len(array)):
-        if len(array[i]) == 0:
-            return True
-    return False
+
+#
+#
+# def isEmpty(array):
+#     for i in range(len(array)):
+#         if len(array[i]) == 0:
+#             return True
+#     return False
+def difference(array1, array2) -> bool:
+    count = 0
+    for i in range(len(array1)):
+        if array1[i] != array2[i]:
+            count += 1
+        if count > 1:
+            return False
+    return True
+
+
+def glue_process(array1, array2):
+    result = []
+    for i in range(len(array1)):
+        if array1[i] == array2[i] or array2[i] == "-" or array1[i] == "-":
+            result.append(array1[i])
+        else:
+            result.append("-")
+    return result
+
+
+def glue(letters) -> list:
+    new_letters = []
+    for i in range(len(letters)):
+        counter = 0
+        for j in range(len(letters)):
+            if i == j:
+                continue
+            elif difference(letters[i], letters[j]) and i != j:
+                if not (glue_process(letters[i], letters[j]) in new_letters):
+                    new_letters.append(glue_process(letters[i], letters[j]))
+                counter += 1
+
+        if counter == 0:
+            letters[i].append("*")
+            new_letters.append(letters[i])
+    return new_letters
+
+
+def containsKey(array1, array2):
+    counter = 0
+    for i in range(len(array1)):
+        if array1[i] == array2[i] or array2[i] == "-" or array1[i] == "-":
+            counter += 1
+    return True if counter == len(array1) else False
+
+
 def generate_simplified_sdnf(arguments, function):
     sdnf = generate_sdnf(arguments, function)
     terms = sdnf.split(" + ")
     letters = []
-    implicants = []
     for i in range(len(terms)):
         terms[i] = terms[i][1:-1]
         letters.append(terms[i].split(" * "))
 
+    for i in range(len(letters)):
+        for j in range(len(letters[i])):
+            if letters[i][j][0:1] == "-":
+                letters[i][j] = "0"
+            else:
+                letters[i][j] = "1"
+    counter = 0
+    dlc = []
     old_letters = letters
-    global_counter = -1
-    v = 0
-    while global_counter != 0:
-        global_counter = -1
-        for i in range(len(letters)):
-            glue_count = 0
-            for j in range(0, len(letters)):
-                if i != j:
-                    if is_glued(letters[i], letters[j]):
-                        global_counter += 1
-                        if not generate_term(letters[i], letters[j]) in implicants:
-                            implicants.append(generate_term(letters[i], letters[j]))
-                        glue_count += 1
-
-            # print("Step", str(v) + ":", implicants)
-            # time.sleep(1)
-            v+=1
-            if glue_count == 0:
-                implicants.append(letters[i])
-            if len(implicants) == 0:
-                break
-        letters = implicants
-        implicants = []
-        global_counter += 1
-
-    letters = reduce_same_implicants(letters)
-
-    implicantion_table = [[0] * (len(old_letters)) for i in range(len(letters))]
-    for i in range(len(old_letters)):
-        for j in range(len(letters)):
-            if contains_implicants(letters[j], old_letters[i]):
-                implicantion_table[j][i] = 1
-
-    simplified_implicants = []
-    # проход по импликационной таблице
-    for i in range(len(old_letters)):
+    while counter != len(letters):
         counter = 0
-        position = 0
-        for j in range(len(letters)):
-            if implicantion_table[j][i] == 1:
+        letters = glue(letters)
+        for i in range(len(letters)):
+            if letters[i][len(letters[i]) - 1] == "*":
                 counter += 1
-                position = j
-        if counter == 1:
-            simplified_implicants.append(letters[position])
-        elif counter == 0:
-            simplified_implicants.append(letters[position])
 
-    if isEmpty(simplified_implicants):
-        return [[1]]
-    return reduce_same_implicants(simplified_implicants)
+        if counter != len(letters) and counter > 0:
+            new_letter = []
+            for i in range(len(letters)):
+                if letters[i][len(letters[i]) - 1] != "*":
+                    new_letter.append(letters[i])
+                else:
+                    dlc.append(letters[i])
+            letters = new_letter
+
+    for i in range(len(dlc)):
+        letters.append(dlc[i])
+
+    for i in range(len(letters)):
+        letters[i].remove("*")
+
+    print(old_letters)
+    print(letters)
+
+    table = [[0] * (len(old_letters)) for i in range(len(letters))]
+    for i in range(len(letters)):
+        for j in range(len(old_letters)):
+            if containsKey(letters[i], old_letters[j]):
+                table[i][j] = 1
+
+    for i in range(len(table)):
+        print(table[i])
+
+    choose = 0
+    result = []
+    for i in range(len(table[0])):
+        counter = 0
+        for j in range(len(table)):
+            counter += table[j][i]
+        if counter == 1:
+            choose += 1
+            for j in range(len(table)):
+                if table[j][i] == 1:
+                    result.append(letters[j])
+                    break
+    if choose == 0:
+        pass
+        # написать метод Петрика
+    else:
+        result = reduce_same_implicants(result)
+        for i in range(len(result)):
+            term = []
+            for j in range(len(result[i])):
+                if result[i][j] == "1":
+                    term.append(arguments[j])
+                elif result[i][j] == "0":
+                    term.append("-" + arguments[j])
+            result[i] = term
+    print(result)
+    return result
 
 
 def decorate_simplified_sdnf(dnf):
@@ -295,4 +364,4 @@ def Sheffer_transformation(dnf):
         print(disjunction(simplified_sdnf))
 
 
-hack(f)
+hack(medium2)

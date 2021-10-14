@@ -13,6 +13,7 @@ def medium5(a, b, c, d, e, f): return (a and not b and not d) and (not f or e or
 def logic2(a, b, c):
     return (not a or b) and not (a or b) and (not a or c)
 
+
 def wiki2(x1, x2, x3, x4):
     return (not x1 and not x2 and not x3) or (x1 and x2 and x3) or (not x1 and x3 and not x4)
 
@@ -31,6 +32,7 @@ def simple3(a, b, c, d):
 
 def wiki1(x1, x2, x3):
     return x2 and not x3 or x1
+
 
 def wiki3(x, y, z, t):
     return (y and not z and not t) or (x and not y) or (x and z)
@@ -196,6 +198,25 @@ def isEmpty(array):
     return True if counter == len(array[0]) else False
 
 
+def construct_argument(str1, str2):
+    result = ""
+    str = str1 + str2
+    for i in range(len(str)):
+        if not str[i:i + 1] in result:
+            result += str[i:i + 1]
+    return result
+
+
+def petrick(first, second):
+    result = []
+    second = list(second)
+    for i in range(len(first)):
+        for j in range(len(second)):
+            if not construct_argument(first[i], second[j]) in result:
+                result.append(construct_argument(first[i], second[j]))
+    return result
+
+
 def generate_simplified_sdnf(arguments, function):
     sdnf = generate_sdnf(arguments, function)
     terms = sdnf.split(" + ")
@@ -238,8 +259,6 @@ def generate_simplified_sdnf(arguments, function):
     for i in range(len(letters)):
         letters[i].remove("*")
 
-    print(old_letters)
-    print(letters)
     if len(letters) == 1 and isEmpty(letters):
         return [[1]]
 
@@ -249,35 +268,41 @@ def generate_simplified_sdnf(arguments, function):
             if containsKey(letters[i], old_letters[j]):
                 table[i][j] = 1
 
-    for i in range(len(table)):
-        print(table[i])
-
-    choose = 0
-    result = []
-    for i in range(len(table[0])):
-        counter = 0
-        for j in range(len(table)):
-            counter += table[j][i]
-        if counter == 1:
-            choose += 1
+    implicants = []
+    if len(table) >= 1:
+        for i in range(len(table[i])):
+            term = ""
             for j in range(len(table)):
                 if table[j][i] == 1:
-                    result.append(letters[j])
-                    break
-    if choose == 0:
-        pass
-        # написать метод Петрика
-    else:
-        result = reduce_same_implicants(result)
-        for i in range(len(result)):
-            term = []
-            for j in range(len(result[i])):
-                if result[i][j] == "1":
-                    term.append(arguments[j])
-                elif result[i][j] == "0":
-                    term.append("-" + arguments[j])
-            result[i] = term
-    print(result)
+                    term += str(j)
+            if len(term) >= 1:
+                implicants.append(term)
+    i = 0
+    while len(implicants) > 1:
+        if i == 0:
+            implicants[0] = list(implicants[0])
+        implicants[0] = petrick(implicants[0], implicants[1])
+        del implicants[1]
+        i += 1
+    min_length = 1000
+    index = 0
+    for i in range(len(implicants[0])):
+        if len(implicants[0][i]) < min_length:
+            index = i
+            min_length = len(implicants[0][i])
+    answer = implicants[0][index]
+    result = []
+    for i in range(len(answer)):
+        result.append(letters[int(answer[i:i + 1])])
+
+    for i in range(len(result)):
+        term = []
+        for j in range(len(result[i])):
+            if result[i][j] == "1":
+                term.append(arguments[j])
+            elif result[i][j] == "0":
+                term.append("-" + arguments[j])
+        result[i] = term
     return result
 
 
@@ -340,4 +365,4 @@ def Sheffer_transformation(dnf):
         print(disjunction(simplified_sdnf))
 
 
-hack(wiki3)
+hack(medium5)

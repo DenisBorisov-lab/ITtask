@@ -365,4 +365,4 @@ def Sheffer_transformation(dnf):
         print(disjunction(simplified_sdnf))
 
 
-hack(medium5)
+hack(wiki3)

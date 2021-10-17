@@ -17,6 +17,7 @@ def time_limit(f):
 def f(a, b, c):
     return a and (b or c)
 
+
 def test(a):
     return False
 
@@ -49,8 +50,8 @@ def simple3(a, b, c, d):
     return a and b or not c and d
 
 
-def wiki1(x1, x2, x3):
-    return x2 and not x3 or x1
+def wiki1(a, b, c):
+    return b and not c or a
 
 
 def wiki3(x, y, z, t):
@@ -66,7 +67,7 @@ def hack(function):
     print("Совершенная дизъюнктивная нормальная функция: ")
     print(generate_sdnf(arguments, function))
     print()
-    print("Упрощённая сднф: ")
+    print("Упрощённая днф: ")
     dnf = generate_simplified_sdnf(arguments, function)
     decorate_simplified_sdnf(dnf)
     print()
@@ -370,7 +371,7 @@ def conjunction(simplified_sdnf):
     return result_array
 
 
-# дизъюнкция с помощью штриха Шеффера (a|a) | (a|b) = a+b
+# дизъюнкция с помощью штриха Шеффера (a|a) | (b|b) = a+b
 def disjunction(simplified_sdnf):
     result = simplified_sdnf[0]
     if len(simplified_sdnf) > 1:
@@ -393,4 +394,4 @@ def Sheffer_transformation(dnf):
         print(disjunction(simplified_sdnf))
 
 
-hack(medium5)
+hack(logic1)

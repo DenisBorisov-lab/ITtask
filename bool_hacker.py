@@ -1,3 +1,19 @@
+from datetime import datetime
+
+
+def time_limit(f):
+    def wrapper(*args, **kwargs):
+        start = datetime.now()
+        f(*args, **kwargs)
+        stop = datetime.now()
+
+        res = stop - start
+
+        print(f'Completed in {res.total_seconds()} seconds')
+
+    return wrapper
+
+
 def f(a, b, c):
     return a and (b or c)
 
@@ -38,6 +54,7 @@ def wiki3(x, y, z, t):
     return (y and not z and not t) or (x and not y) or (x and z)
 
 
+@time_limit
 def hack(function):
     arguments = function.__code__.co_varnames
     print("Таблица истинности: ")
@@ -365,4 +382,4 @@ def Sheffer_transformation(dnf):
         print(disjunction(simplified_sdnf))
 
 
-hack(wiki3)
+hack(medium2)

@@ -8,7 +8,7 @@ def time_limit(f):
         stop = datetime.now()
 
         res = stop - start
-
+        print()
         print(f'Completed in {res.total_seconds()} seconds')
 
     return wrapper
@@ -16,6 +16,9 @@ def time_limit(f):
 
 def f(a, b, c):
     return a and (b or c)
+
+def test(a):
+    return False
 
 
 def logic1(a, b, c):
@@ -66,6 +69,7 @@ def hack(function):
     print("Упрощённая сднф: ")
     dnf = generate_simplified_sdnf(arguments, function)
     decorate_simplified_sdnf(dnf)
+    print()
     print("Функция Шеффера")
     Sheffer_transformation(dnf)
 
@@ -119,6 +123,8 @@ def generate_sdnf(arguments, function):
                     term += "-" + str(table[0][j]) + " * "
             sdnf += term[:-3] + ") + "
     sdnf = sdnf[:-3]
+    if len(sdnf) == 0:
+        return "0"
     return sdnf
 
 
@@ -236,6 +242,8 @@ def petrick(first, second):
 
 def generate_simplified_sdnf(arguments, function):
     sdnf = generate_sdnf(arguments, function)
+    if sdnf == "0":
+        return "0"
     terms = sdnf.split(" + ")
     letters = []
     for i in range(len(terms)):
@@ -375,6 +383,9 @@ def disjunction(simplified_sdnf):
 
 def Sheffer_transformation(dnf):
     simplified_sdnf = dnf
+    if simplified_sdnf == "0" or simplified_sdnf[0][0] == 1:
+        print("")
+        return
     if len(simplified_sdnf) == 1 and len(simplified_sdnf[0]) == 1 and simplified_sdnf[0][0] == 1:
         print(1)
     else:
@@ -382,4 +393,4 @@ def Sheffer_transformation(dnf):
         print(disjunction(simplified_sdnf))
 
 
-hack(medium2)
+hack(medium5)
